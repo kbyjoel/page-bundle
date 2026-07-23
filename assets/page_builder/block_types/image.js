@@ -90,7 +90,7 @@ export const imageBlockType = {
 
                 contentContainer.innerHTML = `
                     <div class="mb-3">
-                        <label class="form-label form-label-sm">${t('page.builder.block.image.alt')}</label>
+                        <label class="form-label pb-label">${t('page.builder.block.image.alt')}</label>
                         <input type="text"
                                class="form-control form-control-sm"
                                placeholder="${t('page.builder.block.image.alt_placeholder')}"
@@ -100,7 +100,7 @@ export const imageBlockType = {
                     </div>
                     <div class="mb-3">
                         <div class="form-check form-switch d-flex justify-content-between">
-                            <label class="form-label mb-0 form-label-sm" for="use-original-size">${t('page.builder.block.image.original_size')}</label>
+                            <label class="form-label mb-0 pb-label" for="use-original-size">${t('page.builder.block.image.original_size')}</label>
                             <input class="form-check-input mt-1"
                                    type="checkbox"
                                    id="use-original-size"
@@ -109,7 +109,7 @@ export const imageBlockType = {
                         </div>
                     </div>
                     <div class="mb-2" id="size-range-container" ${block.useOriginalSize ? 'style="display:none"' : ''}>
-                        <label class="form-label form-label-sm" for="image-size">${t('page.builder.block.image.size')}</label>
+                        <label class="form-label pb-label" for="image-size">${t('page.builder.block.image.size')}</label>
                         <div class="d-flex align-items-center gap-2">
                           <input type="range" min="1" max="100" value="${block.width || 100}"
                                  class="form-range" id="image-size" style="width:100%"

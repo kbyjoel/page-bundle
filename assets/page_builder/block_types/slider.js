@@ -156,7 +156,7 @@ export const sliderBlockType = {
             editCard.className = 'section-slider-item';
             editCard.innerHTML = `
                 <div class="mb-3">
-                    <label class="form-label form-label-sm">Texte alternatif</label>
+                    <label class="form-label pb-label">Texte alternatif</label>
                     <input type="text" class="form-control form-control-sm" value="${item.alt || ''}"
                            data-op="update-alt" data-index="${block.selectedIndex}" data-action="input->page-builder#updateBlockContent">
                 </div>

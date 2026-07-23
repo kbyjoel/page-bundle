@@ -151,7 +151,7 @@ export const titleBlockType = {
         if (contentContainer) {
             contentContainer.innerHTML = `
                 <div class="mb-2">
-                    <label class="form-label form-label-sm d-block mb-1">Alignement horizontal</label>
+                    <label class="form-label pb-label d-block mb-1">Alignement horizontal</label>
                     <div class="d-flex gap-1">
                         <button type="button"
                                 class="pb-button pb-button--ghost flex-fill ${block.horizontalAlignment === 'left' ? 'active' : ''}"
@@ -180,7 +180,7 @@ export const titleBlockType = {
                     </div>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label form-label-sm">Contenu du texte</label>
+                    <label class="form-label pb-label">Contenu du texte</label>
                     <textarea
                         class="form-control form-control-sm"
                         rows="4"
@@ -191,7 +191,7 @@ export const titleBlockType = {
                 </div>
 
                 <div class="mb-2">
-                    <label class="form-label form-label-sm" for="title-style">Style du titre</label>
+                    <label class="form-label pb-label" for="title-style">Style du titre</label>
                     <select
                         class="form-select form-select-sm"
                         id="title-style" name="title-style"

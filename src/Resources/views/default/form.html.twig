@@ -2,7 +2,7 @@
 
 {% block header_title %}{% trans %}pages.title{% endtrans %}{% endblock %}
 {% block header_breadcrumb %}
-    <ul class="breadcrumb breadcrumb-caret position-right">
+    <ul class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url('_admin') }}">{% trans %}text.dashboard{% endtrans %}</a></li>
         <li class="breadcrumb-item"><a href="{{ url('aropixel_page_index', {'type': 'default'}) }}">{% trans %}pages.title{% endtrans %}</a></li>
         {% if page and page.id %}

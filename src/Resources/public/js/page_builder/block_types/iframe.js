@@ -62,14 +62,14 @@ export const iframeBlockType = {
         if (contentContainer) {
             contentContainer.innerHTML = `
                 <div class="mb-3">
-                    <label class="form-label form-label-sm">Mode de rendu</label>
+                    <label class="form-label pb-label">Mode de rendu</label>
                     <select class="form-select form-select-sm" data-page-builder-target="blockRenderingModeInput" data-action="input->page-builder#updateBlockContent">
                         <option value="normal" ${block.renderingMode === 'normal' ? 'selected' : ''}>Normal (max-width: 100%)</option>
                         <option value="ratio169" ${block.renderingMode === 'ratio169' ? 'selected' : ''}>Ratio 16:9 (video-responsive)</option>
                     </select>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label form-label-sm">Contenu (Iframe, HTML...)</label>
+                    <label class="form-label pb-label">Contenu (Iframe, HTML...)</label>
                     <textarea
                         class="form-control form-control-sm"
                         rows="8"

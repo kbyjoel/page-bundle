@@ -21,3 +21,14 @@
 }
 .pb-accordion-inspector .accordion-button:focus { outline: none; }
 .pb-accordion-inspector .accordion-body { padding: 1rem 0 0 0; }
+
+/*
+ * Field labels of the inspector. Page-builder specific: base size (14px) with a semibold
+ * weight, to give the dense stack of controls a readable hierarchy without out-weighing the
+ * accordion headers (which sit at 600 when active). Replaces the dead Bootstrap-looking
+ * `.form-label-sm`. For heavier labels, swap to `var(--aro-weight-bold)`.
+ */
+.pb-label {
+    font-size: var(--aro-text-base);
+    font-weight: var(--aro-weight-semibold);
+}
