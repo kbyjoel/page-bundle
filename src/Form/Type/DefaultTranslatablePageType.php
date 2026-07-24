@@ -2,11 +2,11 @@
 
 namespace Aropixel\PageBundle\Form\Type;
 
+use Aropixel\AdminBundle\Form\Type\EditorType;
 use Aropixel\AdminBundle\Form\Type\TranslatableType;
 use Aropixel\PageBundle\Entity\PageTranslation;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
@@ -28,8 +28,7 @@ class DefaultTranslatablePageType extends AbstractPageType
                 'label' => 'Contenu',
                 'personal_translation' => PageTranslation::class,
                 'property_path' => 'translations',
-                'widget' => TextareaType::class,
-                'attr' => ['class' => 'ckeditor'],
+                'widget' => EditorType::class,
             ])
             ->add('status', HiddenType::class)
             ->add('createdAt', DateTimeType::class, [
