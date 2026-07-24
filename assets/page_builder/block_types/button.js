@@ -54,7 +54,7 @@ export const btnBlockType = {
         if (contentContainer) {
             contentContainer.innerHTML = `
                 <div class="mb-2">
-                    <label class="form-label form-label-sm d-block mb-1">${t('page.builder.inspector.column.horizontal_alignment')}</label>
+                    <label class="form-label pb-label d-block mb-1">${t('page.builder.inspector.column.horizontal_alignment')}</label>
                     <div class="d-flex gap-1">
                         <button type="button"
                                 class="pb-button pb-button--ghost flex-fill"
@@ -83,7 +83,7 @@ export const btnBlockType = {
                     </div>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label form-label-sm">${t('page.builder.block.button.label_field')}</label>
+                    <label class="form-label pb-label">${t('page.builder.block.button.label_field')}</label>
                     <textarea
                         class="form-control form-control-sm"
                         rows="1"
@@ -94,7 +94,7 @@ export const btnBlockType = {
                 </div>
 
                 <div class="mb-2">
-                    <label class="form-label form-label-sm d-block mb-1" for="button-link-type">${t('page.builder.inspector.column.link_type')}</label>
+                    <label class="form-label pb-label d-block mb-1" for="button-link-type">${t('page.builder.inspector.column.link_type')}</label>
                     <select class="form-select form-select-sm" id="button-link-type"
                             data-page-builder-target="blockLinkTypeSelect"
                             data-action="change->page-builder#updateBlockLinkType">
@@ -103,7 +103,7 @@ export const btnBlockType = {
                     </select>
                 </div>
                 <div class="mb-2" data-page-builder-target="blockUrlInputContainer">
-                    <label class="form-label form-label-sm d-block mb-1" for="button-url">${t('page.builder.inspector.column.link_url')}</label>
+                    <label class="form-label pb-label d-block mb-1" for="button-url">${t('page.builder.inspector.column.link_url')}</label>
                     <input type="text"
                            class="form-control form-control-sm"
                            id="button-url"
@@ -112,7 +112,7 @@ export const btnBlockType = {
                            data-action="input->page-builder#updateBlockUrl">
                 </div>
                 <div class="mb-2 d-none" data-page-builder-target="blockPagePathSelectContainer">
-                    <label class="form-label form-label-sm d-block mb-1" for="button-page-path">${t('page.builder.block.button.link_page_label')}</label>
+                    <label class="form-label pb-label d-block mb-1" for="button-page-path">${t('page.builder.block.button.link_page_label')}</label>
                     <select class="form-select form-select-sm" id="button-page-path"
                             data-page-builder-target="blockPagePathSelect"
                             data-action="change->page-builder#updateBlockPagePath"
@@ -122,7 +122,7 @@ export const btnBlockType = {
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label form-label-sm">${t('page.builder.block.button.color')}</label>
+                    <label class="form-label pb-label">${t('page.builder.block.button.color')}</label>
                     <select class="form-select form-select-sm" id="btn-color-select"
                         data-page-builder-target="blockColorInput"
                         data-action="change->page-builder#updateBlockContent">

@@ -54,7 +54,7 @@ class Configuration implements ConfigurationInterface
                                 ->children()
                                     ->scalarNode('type')->isRequired()->end()
                                     ->scalarNode('label')->isRequired()->end()
-                                    ->scalarNode('icon')->defaultValue('fas fa-puzzle-piece')->end()
+                                    ->scalarNode('icon')->defaultValue('lucide:puzzle')->end()
                                     ->scalarNode('category')->defaultValue('custom')->end()
                                 ->end()
                             ->end()

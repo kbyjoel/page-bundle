@@ -30,7 +30,7 @@ export const spacerBlockType = {
         if (contentContainer) {
             contentContainer.innerHTML = `
                 <div class="mb-2 form-group" data-page-builder-target="blockContentInput">
-                    <label class="form-label form-label-sm">Hauteur (px)</label>
+                    <label class="form-label pb-label">Hauteur (px)</label>
                     <input type="number" class="form-control form-control-sm" id="spacer-height"
                            value="${block.height || 20}" min="0" max="200"
                            data-action="input->page-builder#updateBlockContent">

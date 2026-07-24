@@ -27,11 +27,11 @@
 
     <div id="app">
 
-        {{ include('@AropixelAdmin/Image/Modals/library.html.twig', { 'category' : false }) }}
+        {{ include('@AropixelAdmin/Image/Modals/library.html.twig', {category: false}) }}
 
-        <div class="main-wrapper main-wrapper-1">
+        <div class="main-wrapper-1">
 
-            {% include '@AropixelAdmin/Menu/fullscreen.html.twig' %}
+            {{ include('@AropixelAdmin/Menu/fullscreen.html.twig') }}
 
             {# On ajoute ici le contrôleur 'page-builder-saver' en plus de 'page-builder' #}
             <div
@@ -42,7 +42,7 @@
                 data-page-builder-initial-meta-value="{{ page ? {
                     title: page.title,
                     slug: page.slug,
-                    description: page.metaDescription
+                    description: page.metaDescription,
                 }|json_encode|e('html_attr') : '{}' }}"
 
                 data-page-builder-saver-save-url-value="{{ path('aropixel_builder_page_save') }}"
@@ -66,7 +66,7 @@
                                 <span data-page-builder-target="nameText">
                                     {% trans %}page.builder.new_page{% endtrans %}
                                 </span>
-                                <i class="fas fa-pen ms-2"></i>
+                                {{ ux_icon('lucide:pen', {class: 'ms-2'}) }}
                             </span>
                             <input type="text"
                                class="form-control form-control-lg d-none"
@@ -107,7 +107,7 @@
                                     {# MODIFICATION ICI : L'action pointe vers page-builder-saver #}
                                     <button type="button" class="btn btn-small btn-secondary"
                                             data-action="click->page-builder-saver#save">
-                                        <i class="far fa-save me-1"></i> {% trans %}form.save{% endtrans %}
+                                        {{ ux_icon('lucide:save', {class: 'me-1'}) }} {% trans %}form.save{% endtrans %}
                                     </button>
                                     <button type="button" class="btn btn-small btn-secondary dropdown-toggle dropdown-toggle-split"
                                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -116,17 +116,17 @@
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center" href="#" data-action="click->page-builder-saver#save">
-                                                <i class="fa fa-copy me-1"></i> {% trans %}form.save{% endtrans %}
+                                                {{ ux_icon('lucide:copy', {class: 'me-1'}) }} {% trans %}form.save{% endtrans %}
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center" href="{{ path('aropixel_builder_page') }}">
-                                                <i class="fas fa-file me-1"></i> {% trans %}page.builder.new_page{% endtrans %}
+                                                {{ ux_icon('lucide:file', {class: 'me-1'}) }} {% trans %}page.builder.new_page{% endtrans %}
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center" href="{{ path('aropixel_page_index') }}">
-                                                <i class="fas fa-list me-1"></i> {% trans %}page.builder.back_to_list{% endtrans %}
+                                                {{ ux_icon('lucide:list', {class: 'me-1'}) }} {% trans %}page.builder.back_to_list{% endtrans %}
                                             </a>
                                         </li>
                                         {% if page and page.id %}
@@ -134,8 +134,8 @@
                                                 <hr class="dropdown-divider">
                                             </li>
                                             <li>
-                                                <a class="dropdown-item d-flex align-items-center" target="_blank" href="{{ path('aropixel_builder_page_preview', {'id': page.id}) }}">
-                                                    <i class="fas fa-eye me-1"></i> {% trans %}page.builder.view_page{% endtrans %}
+                                                <a class="dropdown-item d-flex align-items-center" target="_blank" href="{{ path('aropixel_builder_page_preview', {id: page.id}) }}">
+                                                    {{ ux_icon('lucide:eye', {class: 'me-1'}) }} {% trans %}page.builder.view_page{% endtrans %}
                                                 </a>
                                             </li>
                                         {% endif %}
@@ -175,13 +175,13 @@
                         <aside class="position-sticky" style="width: 320px; top: 135px; align-self: start;">
                             <div class="tab-content">
                                 <div class="tab-pane pt-0 fade" id="nav-param" role="tabpanel" aria-labelledby="nav-param-tab">
-                                    {% include '@AropixelPage/builder/_param.html.twig' %}
+                                    {{ include('@AropixelPage/builder/_param.html.twig') }}
                                 </div>
                                 <div class="tab-pane pt-0 fade" id="nav-structure" role="tabpanel" aria-labelledby="nav-structure-tab">
-                                    {% include '@AropixelPage/builder/_structure.html.twig' %}
+                                    {{ include('@AropixelPage/builder/_structure.html.twig') }}
                                 </div>
                                 <div class="tab-pane pt-0 fade show active" id="nav-library" role="tabpanel" aria-labelledby="nav-library-tab">
-                                    {% include '@AropixelPage/builder/_library.html.twig' %}
+                                    {{ include('@AropixelPage/builder/_library.html.twig') }}
                                 </div>
                             </div>
                         </aside>
@@ -195,12 +195,12 @@
                                         <button type="button" class="pb-device-switch-btn pb-device-switch-btn--active"
                                                 data-page-builder-target="deviceButton" data-device="desktop"
                                                 data-action="click->page-builder#switchDevice" title="{% trans %}page.builder.view_desktop{% endtrans %}">
-                                            <i class="fas fa-desktop"></i>
+                                            {{ ux_icon('lucide:monitor') }}
                                         </button>
                                         <button type="button" class="pb-device-switch-btn"
                                                 data-page-builder-target="deviceButton" data-device="mobile"
                                                 data-action="click->page-builder#switchDevice" title="{% trans %}page.builder.view_mobile{% endtrans %}">
-                                            <i class="fas fa-mobile-alt"></i>
+                                            {{ ux_icon('lucide:smartphone') }}
                                         </button>
                                     </div>
                                 </div>

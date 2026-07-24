@@ -38,7 +38,7 @@ export const dividerBlockType = {
         if (contentContainer) {
             contentContainer.innerHTML = `
                 <div class="mb-2 form-group" data-page-builder-target="blockContentInput">
-                    <label class="form-label form-label-sm">${t('page.builder.block.divider.margin_top')}</label>
+                    <label class="form-label pb-label">${t('page.builder.block.divider.margin_top')}</label>
                     <input type="number" class="form-control form-control-sm" id="divider-margin-top"
                            value="${block.marginTop || 20}" min="0" max="200"
                            data-action="input->page-builder#updateBlockContent">

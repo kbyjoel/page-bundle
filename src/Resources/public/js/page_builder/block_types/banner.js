@@ -111,7 +111,7 @@ export const bannerBlockType = {
             contentContainer.innerHTML = `
 
                 <div class="mb-2">
-                    <label class="form-label form-label-sm">Contenu du texte</label>
+                    <label class="form-label pb-label">Contenu du texte</label>
                     <textarea
                         class="form-control form-control-sm"
                         rows="4"

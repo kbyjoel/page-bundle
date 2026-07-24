@@ -106,7 +106,7 @@
 
 .pb-block-banner-container .pb-block-content-preview.pb-banner-preview {
     color: var(--secondary-color);
-    font-family: forevs, sans-serif;
+    font-family: sans-serif;
     font-weight: 800;
     font-size: 60px;
     text-transform: uppercase;
