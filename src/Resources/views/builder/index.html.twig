@@ -27,11 +27,11 @@
 
     <div id="app">
 
-        {{ include('@AropixelAdmin/Image/Modals/library.html.twig', { 'category' : false }) }}
+        {{ include('@AropixelAdmin/Image/Modals/library.html.twig', {category: false}) }}
 
         <div class="main-wrapper-1">
 
-            {% include '@AropixelAdmin/Menu/fullscreen.html.twig' %}
+            {{ include('@AropixelAdmin/Menu/fullscreen.html.twig') }}
 
             {# On ajoute ici le contrôleur 'page-builder-saver' en plus de 'page-builder' #}
             <div
@@ -42,7 +42,7 @@
                 data-page-builder-initial-meta-value="{{ page ? {
                     title: page.title,
                     slug: page.slug,
-                    description: page.metaDescription
+                    description: page.metaDescription,
                 }|json_encode|e('html_attr') : '{}' }}"
 
                 data-page-builder-saver-save-url-value="{{ path('aropixel_builder_page_save') }}"
@@ -134,7 +134,7 @@
                                                 <hr class="dropdown-divider">
                                             </li>
                                             <li>
-                                                <a class="dropdown-item d-flex align-items-center" target="_blank" href="{{ path('aropixel_builder_page_preview', {'id': page.id}) }}">
+                                                <a class="dropdown-item d-flex align-items-center" target="_blank" href="{{ path('aropixel_builder_page_preview', {id: page.id}) }}">
                                                     {{ ux_icon('lucide:eye', {class: 'me-1'}) }} {% trans %}page.builder.view_page{% endtrans %}
                                                 </a>
                                             </li>
@@ -175,13 +175,13 @@
                         <aside class="position-sticky" style="width: 320px; top: 135px; align-self: start;">
                             <div class="tab-content">
                                 <div class="tab-pane pt-0 fade" id="nav-param" role="tabpanel" aria-labelledby="nav-param-tab">
-                                    {% include '@AropixelPage/builder/_param.html.twig' %}
+                                    {{ include('@AropixelPage/builder/_param.html.twig') }}
                                 </div>
                                 <div class="tab-pane pt-0 fade" id="nav-structure" role="tabpanel" aria-labelledby="nav-structure-tab">
-                                    {% include '@AropixelPage/builder/_structure.html.twig' %}
+                                    {{ include('@AropixelPage/builder/_structure.html.twig') }}
                                 </div>
                                 <div class="tab-pane pt-0 fade show active" id="nav-library" role="tabpanel" aria-labelledby="nav-library-tab">
-                                    {% include '@AropixelPage/builder/_library.html.twig' %}
+                                    {{ include('@AropixelPage/builder/_library.html.twig') }}
                                 </div>
                             </div>
                         </aside>

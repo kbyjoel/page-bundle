@@ -9,7 +9,6 @@
     </ul>
 {% endblock %}
 
-
 {% block header_top_right %}
     {% if page_builder_enabled %}
         <button type="button" class="btn btn-small btn-primary ms-3"
@@ -40,7 +39,6 @@
     {% endif %}
 {% endblock %}
 
-
 {% block theme_stylesheets %}
     {{ parent() }}
     {% if page_builder_enabled %}
@@ -60,7 +58,6 @@
     </style>
     {% endif %}
 {% endblock %}
-
 
 {% block theme_javascripts %}
     {{ parent() }}
@@ -86,9 +83,7 @@
     {% endif %}
 {% endblock %}
 
-
 {% block paneltitle %}{% trans %}page.text.list{% endtrans %}{% endblock %}
-
 
 {% block paneldatatable %}
 
@@ -109,13 +104,13 @@
 
                 <tr>
                     <td>
-                        <a class="position-relative" href="{{ path(edit_route, {'id': page.id}) }}">
-                            <img class="img-rounded rounded-3" src="{{ null | aropixel_imagine_filter('admin_thumbnail') }}" height="60" />
-                            <span class="state-icon img-state-icon state-icon--{{ page.status }}" title="{{ page.status == 'online' ? "status.published"|trans : "status.offline"|trans }}"></span>
+                        <a class="position-relative" href="{{ path(edit_route, {id: page.id}) }}">
+                            <img class="img-rounded rounded-3" src="{{ null|aropixel_imagine_filter('admin_thumbnail') }}" height="60" />
+                            <span class="state-icon img-state-icon state-icon--{{ page.status }}" title="{{ page.status == 'online' ? 'status.published'|trans : 'status.offline'|trans }}"></span>
                         </a>
                     </td>
                     <td>
-                        <a class="d-flex align-items-center" href="{{ path(edit_route, {'id': page.id}) }}">
+                        <a class="d-flex align-items-center" href="{{ path(edit_route, {id: page.id}) }}">
                             {{ page.title }}
                         </a>
                     </td>
@@ -123,11 +118,11 @@
                     <td class="text-right">
                         {{ list.actions(
                             page,
-                            path(edit_route, {'id': page.id}),
-                            page.isDeletable ? path('aropixel_page_delete', {'id': page.id}) : null,
+                            path(edit_route, {id: page.id}),
+                            page.isDeletable ? path('aropixel_page_delete', {id: page.id}) : null,
                             'pages.list.delete_warning'|trans,
                             null,
-                            page.isDeletable ? csrf_token('delete__' ~ page.type ~ '_page' ~ page.id) : null
+                            page.isDeletable ? csrf_token('delete__' ~ page.type ~ '_page' ~ page.id) : null,
                         ) }}
                     </td>
                 </tr>

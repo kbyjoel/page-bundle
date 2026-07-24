@@ -209,16 +209,16 @@
                             <span class="pb-block-card-label">{% trans %}page.builder.block.banner{% endtrans %}</span>
                         </button>
                     </div>
-{#                    <div class="col-4">#}
-{#                        <button class="pb-block-card"#}
-{#                                data-action="click->page-builder#addBlockFromLibrary"#}
-{#                                data-block-type="nested-row">#}
-{#                            <div class="pb-block-card-icon">#}
-{#                                {{ ux_icon('lucide:layout-grid') }}#}
-{#                            </div>#}
-{#                            <span class="pb-block-card-label">Grille</span>#}
-{#                        </button>#}
-{#                    </div>#}
+{# <div class="col-4"> #}
+{# <button class="pb-block-card" #}
+{# data-action="click->page-builder#addBlockFromLibrary" #}
+{# data-block-type="nested-row"> #}
+{# <div class="pb-block-card-icon"> #}
+{# {{ ux_icon('lucide:layout-grid') }} #}
+{# </div> #}
+{# <span class="pb-block-card-label">Grille</span> #}
+{# </button> #}
+{# </div> #}
                     <div class="col-4">
                         <button type="button"
                                 class="pb-block-card"
@@ -314,7 +314,7 @@
 
         <div class="tab-content">
 
-            {% include '@AropixelPage/builder/_template.html.twig' %}
+            {{ include('@AropixelPage/builder/_template.html.twig') }}
 
         </div>
 

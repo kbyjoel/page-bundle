@@ -44,11 +44,11 @@
                         <td class="text-right">
                             {{ list.actions(
                                 page,
-                                path('aropixel_builder_page_edit', {'id': page.id}),
-                                path('aropixel_builder_page_delete', {'id': page.id}),
+                                path('aropixel_builder_page_edit', {id: page.id}),
+                                path('aropixel_builder_page_delete', {id: page.id}),
                                 'pages.list.delete_warning'|trans,
                                 null,
-                                csrf_token('delete__page' ~ page.id)
+                                csrf_token('delete__page' ~ page.id),
                             ) }}
                         </td>
                     </tr>
