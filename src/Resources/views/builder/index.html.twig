@@ -2,25 +2,39 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.bubble.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    {# Le thème `bubble` du canvas ; `quill.snow.css` et `quill.js` viennent déjà du layout admin,
+       en 2.0.3 comme celui-ci. Aucun CDN : un back-office ne doit dépendre que de ses propres assets. #}
+    <link rel="stylesheet" href="{{ asset('bundles/aropixeladmin/modules/quilljs/quill.bubble.css') }}">
     <link rel="stylesheet" href="{{ asset('bundles/aropixelpage/css/page-builder.css') }}">
     {% if page_builder_config.custom_css is defined and page_builder_config.custom_css %}
         <link rel="stylesheet" href="{{ asset(page_builder_config.custom_css) }}">
     {% endif %}
 {% endblock %}
 
+{# `parent()` d'abord : ce bloc porte tout le temps d'exécution de l'administration — app.js, les
+   traductions DataTables, le gestionnaire d'images. Le redéfinir sans lui, ce que faisait ce
+   gabarit, laissait le builder dans une administration amputée : bibliothèque d'images en anglais
+   et sans mise en forme, et `initImageManager` absent de `window`. #}
 {% block theme_javascripts %}
+    {{ parent() }}
+
     <script type="application/json" id="page-json-list-url">
-        {{ url('aropixel_builder_page_json_list')|json_encode(constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_HEX_TAG'))|raw }}
+        {{ (json_list_url|default(url('aropixel_builder_page_json_list')))|json_encode(constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_HEX_TAG'))|raw }}
     </script>
     <script type="application/json" id="page-builder-config">
         {{ page_builder_config|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_UNESCAPED_UNICODE'))|raw }}
     </script>
-    {% if not aropixel_asset_mapper_enabled %}
-        <script src="{{ asset('bundles/aropixelpage/js/page_builder_controller.js') }}" type="module"></script>
-        <script src="{{ asset('bundles/aropixelpage/js/page_builder_saver_controller.js') }}" type="module"></script>
-    {% endif %}
+
+    {# Bloc à part pour que les applications qui empaquettent leurs assets le vident : servis en
+       modules bruts, ces contrôleurs demandent au navigateur de résoudre `@hotwired/stimulus`, ce
+       qu'il ne sait pas faire sans importmap. Elles fournissent alors les mêmes contrôleurs par leur
+       propre entrée, sans perdre le reste du bloc. #}
+    {% block builder_javascripts %}
+        {% if not aropixel_asset_mapper_enabled %}
+            <script src="{{ asset('bundles/aropixelpage/js/page_builder_controller.js') }}" type="module"></script>
+            <script src="{{ asset('bundles/aropixelpage/js/page_builder_saver_controller.js') }}" type="module"></script>
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block body_content %}
@@ -45,7 +59,7 @@
                     description: page.metaDescription,
                 }|json_encode|e('html_attr') : '{}' }}"
 
-                data-page-builder-saver-save-url-value="{{ path('aropixel_builder_page_save') }}"
+                data-page-builder-saver-save-url-value="{{ save_url|default(path('aropixel_builder_page_save')) }}"
                 data-page-builder-saver-page-id-value="{{ page ? page.id : '' }}"
             >
 
@@ -59,6 +73,7 @@
                                 Page Builder
                             {% endif %}
                             {% if page %}<small class="text-muted fw-normal ms-2">#{{ page.id }}</small>{% endif %}
+{% block builder_page_name %}
                             <span class="ms-2 page-name-editable"
                               style="font-size: 18px; font-weight: 500; color: #9f9f9f; cursor: text; position: relative;"
                               data-page-builder-target="nameDisplay"
@@ -73,6 +88,7 @@
                                data-page-builder-target="nameInput"
                                data-action="blur->page-builder#saveNameEdit keydown->page-builder#handleNameKeydown"
                                style="display: inline-block; width: auto; min-width: 300px;" />
+{% endblock %}
                         </h5>
                         <div class="ms-auto d-none d-md-flex align-items-center gap-2 form-action-btns">
 
@@ -113,6 +129,7 @@
                                             data-bs-toggle="dropdown" aria-expanded="false">
                                         <span class="visually-hidden">Actions</span>
                                     </button>
+{% block builder_actions %}
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center" href="#" data-action="click->page-builder-saver#save">
@@ -134,17 +151,19 @@
                                                 <hr class="dropdown-divider">
                                             </li>
                                             <li>
-                                                <a class="dropdown-item d-flex align-items-center" target="_blank" href="{{ path('aropixel_builder_page_preview', {id: page.id}) }}">
+                                                <a class="dropdown-item d-flex align-items-center" target="_blank" href="{{ preview_url|default(path('aropixel_builder_page_preview', {id: page.id})) }}">
                                                     {{ ux_icon('lucide:eye', {class: 'me-1'}) }} {% trans %}page.builder.view_page{% endtrans %}
                                                 </a>
                                             </li>
                                         {% endif %}
                                     </ul>
+{% endblock %}
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="main-content main-content-fullscreen d-flex justify-content-between align-items-center">
+{% block builder_tabs %}
                         <ul class="nav nav-tabs tab-underlined" id="myTab" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link" role="tab" data-bs-toggle="tab" href="#nav-param" id="nav-param-tab">{% trans %}page.builder.tab.settings{% endtrans %}</a>
@@ -156,6 +175,7 @@
                                 <a class="nav-link active" role="tab" data-bs-toggle="tab" href="#nav-library" id="nav-library-tab">{% trans %}page.builder.tab.content{% endtrans %}</a>
                             </li>
                         </ul>
+{% endblock %}
                         {% if pb_locales|length > 1 %}
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="syncLocales" checked
@@ -170,6 +190,13 @@
                 </div>
 
                 <div class="main-content main-content-fullscreen">
+                    {# Le builder construit sa propre coquille plutôt que d'hériter de `body` : les
+                       messages flash, rendus par la mise en page, doivent donc être appelés ici.
+                       Sans cela un `addFlash()` posé par l'application — publier, appliquer un
+                       modèle — n'était jamais consommé, et l'exploitant les recevait tous d'un coup
+                       à sa prochaine visite d'une liste. #}
+                    {{ block('flash_messages', '@AropixelAdmin/base.html.twig') }}
+
                     <div class="row g-3">
                         {# Colonne gauche : Sidebar #}
                         <aside class="position-sticky" style="width: 320px; top: 135px; align-self: start;">

@@ -26,6 +26,35 @@ services:
     resource: '../../Controller'
     tags: [ 'controller.service_arguments' ]
 
+  Aropixel\PageBundle\Component\Builder\SectionColors:
+    arguments:
+      $colors: '%aropixel_page.page_builder.section_colors%'
+
+  Aropixel\PageBundle\Component\Builder\UiKitPageBuilderRenderer:
+    arguments:
+      $customBlockRenderers: !tagged_iterator aropixel_page.block_renderer
+
+  Aropixel\PageBundle\Component\Builder\BootstrapPageBuilderRenderer:
+    arguments:
+      $customBlockRenderers: !tagged_iterator aropixel_page.block_renderer
+
+  Aropixel\PageBundle\Component\Security\PageAccessCheckerInterface:
+    alias: Aropixel\PageBundle\Component\Security\AllowAllPageAccessChecker
+
+  Aropixel\PageBundle\Component\Builder\BlockPolicy:
+    arguments:
+      $allowedBlocks: '%aropixel_page.page_builder.allowed_blocks%'
+      $requiredBlocks: '%aropixel_page.page_builder.required_blocks%'
+
+  Aropixel\PageBundle\Component\Builder\RoutePageUrlGenerator:
+    arguments:
+      $routeName: '%aropixel_page.page_builder.front_route.name%'
+      $routeParameter: '%aropixel_page.page_builder.front_route.parameter%'
+      $includeParent: '%aropixel_page.page_builder.front_route.include_parent%'
+
+  Aropixel\PageBundle\Component\Builder\PageUrlGeneratorInterface:
+    alias: Aropixel\PageBundle\Component\Builder\RoutePageUrlGenerator
+
   Aropixel\PageBundle\Controller\Builder\BuilderAction:
     arguments:
       $pageBuilderConfig: '%aropixel_page.page_builder%'

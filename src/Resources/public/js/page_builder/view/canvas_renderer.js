@@ -156,6 +156,19 @@ export class CanvasRenderer {
 
         this.#applyBackground(wrapper, section.background);
 
+        // Les couleurs choisies pour la section : le canvas doit montrer ce que la page rendra, donc
+        // il applique la même liste et le même contrat — une variable par couleur, et `color` pour
+        // celle dont les blocs doivent hériter.
+        (this.ctx.pageBuilderConfig?.section_colors || []).forEach((color) => {
+            const value = section[`${color.key}Color`] || '';
+
+            if (color.inherited) {
+                wrapper.style.color = value;
+            }
+
+            wrapper.style.setProperty(color.variable, value);
+        });
+
         const inner = document.createElement('div');
         inner.classList.add('pb-page-section-inner');
 

@@ -1,3 +1,7 @@
+import { t } from '../i18n.js';
+import { getStyleOptions, renderStyleSelect } from '../style_options.js';
+import { icon } from '../../utils/icons.js';
+
 export const titleBlockType = {
     type: 'title',
 
@@ -14,9 +18,12 @@ export const titleBlockType = {
     },
 
     parseSize(sizeValue) {
-        const parts = sizeValue.split('-');
-        const tag = parts[0];
-        const classNamesString = parts[1] || '';
+        // Découper au PREMIER tiret seulement : le reste est la liste des classes, qui en contiennent
+        // elles-mêmes (`div-footer-heading_16` → tag `div`, classe `footer-heading`, taille 16). Le
+        // renderer PHP fait de même — `explode('-', $size, 2)` — et les deux doivent rester d'accord.
+        const separateur = sizeValue.indexOf('-');
+        const tag = separateur === -1 ? sizeValue : sizeValue.slice(0, separateur);
+        const classNamesString = separateur === -1 ? '' : sizeValue.slice(separateur + 1);
         let classNames = classNamesString ? classNamesString.split('_') : [];
         let fontSize = null;
 
@@ -159,7 +166,7 @@ export const titleBlockType = {
                                 data-page-builder-target="blockAlignmentButton"
                                 data-action="click->page-builder#updateBlockContent"
                                 title="Aligné à gauche">
-                            <i class="fas fa-align-left"></i>
+                            ${icon('align-left')}
                         </button>
                         <button type="button"
                                 class="pb-button pb-button--ghost flex-fill ${block.horizontalAlignment === 'center' ? 'active' : ''}"
@@ -167,7 +174,7 @@ export const titleBlockType = {
                                 data-page-builder-target="blockAlignmentButton"
                                 data-action="click->page-builder#updateBlockContent"
                                 title="Centré">
-                            <i class="fas fa-align-center"></i>
+                            ${icon('align-center')}
                         </button>
                         <button type="button"
                                 class="pb-button pb-button--ghost flex-fill ${block.horizontalAlignment === 'right' ? 'active' : ''}"
@@ -175,7 +182,7 @@ export const titleBlockType = {
                                 data-page-builder-target="blockAlignmentButton"
                                 data-action="click->page-builder#updateBlockContent"
                                 title="Aligné à droite">
-                            <i class="fas fa-align-right"></i>
+                            ${icon('align-right')}
                         </button>
                     </div>
                 </div>
@@ -189,23 +196,13 @@ export const titleBlockType = {
                         data-action="input->page-builder#updateBlockContent"
                     ></textarea>
                 </div>
-
-                <div class="mb-2">
-                    <label class="form-label pb-label" for="title-style">Style du titre</label>
-                    <select
-                        class="form-select form-select-sm"
-                        id="title-style" name="title-style"
-                        data-page-builder-target="blockStyleInput"
-                        data-action="change->page-builder#updateBlockContent"
-                    >
-                        <option value="h2" ${block.size === 'h2' ? 'selected' : ''}>Style</option>
-                        <option value="h2-heading_32" ${block.size === 'h2-heading' ? 'selected' : ''}>Titre souligné</option>
-                        <option value="h2-heading_36" ${block.size === 'h2-heading_36' ? 'selected' : ''}>Titre en-tête souligné</option>
-                        <option value="h2-secondary_32" ${block.size === 'h2-secondary_32' ? 'selected' : ''}>Titre jaune</option>
-                        <option value="div-title_24" ${block.size === 'div-title_24' ? 'selected' : ''}>Petit titre rose</option>
-                        <option value="div-name_big_44" ${block.size === 'div-name_big_44' ? 'selected' : ''}>Gros titre rose</option>
-                    </select>
-                </div>
+${renderStyleSelect({
+                    options: getStyleOptions(ctx, 'title_styles'),
+                    selected: block.size || '',
+                    id: 'title-style',
+                    label: t('page.builder.block.title.style'),
+                    target: 'blockStyleInput',
+                })}
             `;
         }
 

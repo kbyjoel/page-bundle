@@ -305,10 +305,6 @@
         <source>page.builder.template.iconbox</source>
         <target>Mřížka ikon</target>
       </trans-unit>
-      <trans-unit id="pb_tpl_ticketing" resname="page.builder.template.ticketing">
-        <source>page.builder.template.ticketing</source>
-        <target>Mřížka vstupenek</target>
-      </trans-unit>
       <trans-unit id="pb_insp_placeholder" resname="page.builder.inspector.placeholder">
         <source>page.builder.inspector.placeholder</source>
         <target>Vyberte prvek na stránce pro úpravu jeho nastavení.</target>
@@ -381,6 +377,22 @@
         <source>page.builder.inspector.column.border_radius</source>
         <target>Zaoblení rohů (px)</target>
       </trans-unit>
+      <trans-unit id="pb_insp_text_color" resname="page.builder.inspector.text_color">
+        <source>page.builder.inspector.text_color</source>
+        <target>Barva textu</target>
+      </trans-unit>
+      <trans-unit id="pb_insp_title_color" resname="page.builder.inspector.title_color">
+        <source>page.builder.inspector.title_color</source>
+        <target>Barva nadpisů</target>
+      </trans-unit>
+      <trans-unit id="pb_insp_link_color" resname="page.builder.inspector.link_color">
+        <source>page.builder.inspector.link_color</source>
+        <target>Barva odkazů</target>
+      </trans-unit>
+      <trans-unit id="pb_insp_color_reset" resname="page.builder.inspector.color_reset">
+        <source>page.builder.inspector.color_reset</source>
+        <target>Výchozí</target>
+      </trans-unit>
       <trans-unit id="pb_insp_bg_type" resname="page.builder.inspector.background_type">
         <source>page.builder.inspector.background_type</source>
         <target>Typ pozadí</target>
@@ -420,10 +432,6 @@
       <trans-unit id="pb_insp_row_grid_icon" resname="page.builder.inspector.row.grid_icon">
         <source>page.builder.inspector.row.grid_icon</source>
         <target>Mřížka ikon</target>
-      </trans-unit>
-      <trans-unit id="pb_insp_row_grid_ticketing" resname="page.builder.inspector.row.grid_ticketing">
-        <source>page.builder.inspector.row.grid_ticketing</source>
-        <target>Mřížka vstupenek</target>
       </trans-unit>
       <trans-unit id="pb_insp_row_grid_collapse" resname="page.builder.inspector.row.grid_collapse">
         <source>page.builder.inspector.row.grid_collapse</source>
@@ -560,6 +568,14 @@
       <trans-unit id="pb_btn_color" resname="page.builder.block.button.color">
         <source>page.builder.block.button.color</source>
         <target>Barva tlačítka</target>
+      </trans-unit>
+      <trans-unit id="pb_style_orphan" resname="page.builder.style.orphan">
+        <source>page.builder.style.orphan</source>
+        <target>{style} (nedeklarovaný styl)</target>
+      </trans-unit>
+      <trans-unit id="pb_title_style" resname="page.builder.block.title.style">
+        <source>page.builder.block.title.style</source>
+        <target>Styl nadpisu</target>
       </trans-unit>
       <trans-unit id="pb_btn_default_label" resname="page.builder.block.button.default_label">
         <source>page.builder.block.button.default_label</source>

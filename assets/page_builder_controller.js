@@ -37,6 +37,7 @@ export default class extends Controller {
         'sectionBackgroundImageValue',
         'sectionBackgroundImageName',
         'sectionBackgroundClassInput',
+        'sectionColorPicker',
         'blockTitle',
         'blockContentInput',
         'blockUrlInput',
@@ -1163,6 +1164,17 @@ export default class extends Controller {
             this.sectionsManager.updateSectionBackground(null, null);
             this.renderCanvas();
         }
+    }
+
+    updateSectionColor(event) {
+        this.sectionsManager.updateSectionColor(event.target.dataset.pbColorKey, event.target.value);
+        this.renderCanvas();
+    }
+
+    /** Revenir aux couleurs du thème : un champ `color` ne sait pas rendre « aucune valeur ». */
+    resetSectionColor(event) {
+        this.sectionsManager.updateSectionColor(event.currentTarget.dataset.pbColorKey, null);
+        this.renderCanvas();
     }
 
     updateSectionBackgroundValue(event) {

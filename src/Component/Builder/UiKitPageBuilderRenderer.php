@@ -4,7 +4,6 @@ namespace Aropixel\PageBundle\Component\Builder;
 
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 /**
@@ -13,10 +12,13 @@ use Twig\Environment;
 class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
 {
     public function __construct(
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly PageUrlGeneratorInterface $pageUrlGenerator,
         private readonly RequestStack $requestStack,
         private readonly Environment $twig,
         private readonly CacheManager $cacheManager,
+        /** @var iterable<CustomBlockRendererInterface> */
+        private readonly iterable $customBlockRenderers = [],
+        private readonly SectionColors $sectionColors = new SectionColors(),
     ) {
     }
     /**
@@ -54,7 +56,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
             $sectionClasses = ['uk-section'];
             $sectionStyle = '';
 
-            $background = $section['background'];
+            $background = $section['background'] ?? null;
             if ($background) {
                 $backgroundType = $background['type'] ?? null;
 
@@ -67,6 +69,11 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
                     $sectionStyle .= 'background-color:' . htmlspecialchars($background['value']) . ';';
                 }
             }
+
+            // Un fond choisi librement peut rendre le contenu illisible : les couleurs de la section
+            // se règlent au même endroit, et c'est l'application qui dit lesquelles elle offre.
+            // {@see SectionColors}
+            $sectionStyle .= $this->sectionColors->styleFor($section);
 
             // Layout mapping: "container" (default) -> uk-container; "full" -> none
             $layout = $section['layout'] ?? 'container';
@@ -93,7 +100,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
             $rows = $section['rows'] ?? [];
             foreach ($rows as $row) {
 
-                $slider = $row['slider'];
+                $slider = $row['slider'] ?? null;
 
                 $rowAlign = $row['align'] ?? null;
                 $gridClasses = ['uk-grid'];
@@ -106,7 +113,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
                     $gridClasses[] = $this->mapJustifyContent($rowJustifyContent);
                 }
 
-                if ($row['type'] === 'collapse') {
+                if (($row['type'] ?? null) === 'collapse') {
                     $gridClasses[] = 'uk-grid-collapse';
                     $sectionClasses[] = 'uk-padding-remove';
                 }
@@ -124,7 +131,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
 
                     $colClasses = [$this->mapWidthToUIKit($widths)];
 
-                    if ($row['reverseMobile'] && 0 == $key) {
+                    if (($row['reverseMobile'] ?? false) && 0 == $key) {
                         $colClasses[] = 'uk-flex-last uk-flex-first@m';
                     }
 
@@ -153,8 +160,9 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
                     }
 
                     /** Si une hauteur est définie, on fait en sorte que le contenu soit centré verticalement */
-                    if ($col['height'] && 'auto' !== $col['height']) {
-                        $colClasses[] = 'uk-height-' . $col['height'];
+                    $colHeight = $col['height'] ?? null;
+                    if ($colHeight && 'auto' !== $colHeight) {
+                        $colClasses[] = 'uk-height-' . $colHeight;
                         $colClasses[] = 'uk-flex uk-flex-column uk-flex-center';
                     }
 
@@ -197,7 +205,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
                         } else {
                             $blocksHtml .= $blockContent;
                         }
-                        if ('banner' === $block['type']) {
+                        if ('banner' === ($block['type'] ?? null)) {
                             $sectionClasses[] = 'uk-section-small';
                             $sectionClasses[] = 'bkg-img-primary';
                             $sectionClasses[] = 'scrolling-text';
@@ -330,8 +338,26 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
             'nested-row' => $this->renderGrid($block),
             'banner' => $this->renderBanner($block),
             'iframe' => $this->renderIframeBlock($block),
-            default => ''
+            default => $this->renderCustomBlock($block),
         };
+    }
+
+    /**
+     * A type the bundle does not know: the application may still render it.
+     *
+     * @param array<string, mixed> $block
+     */
+    private function renderCustomBlock(array $block): string
+    {
+        $type = (string)($block['type'] ?? '');
+
+        foreach ($this->customBlockRenderers as $renderer) {
+            if ($renderer->supports($type)) {
+                return $renderer->render($block);
+            }
+        }
+
+        return '';
     }
 
     private function renderTitleBlock(array $block): string
@@ -374,7 +400,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
         }
 
         $alignment = '';
-        if ($block['horizontalAlignment']) {
+        if ($block['horizontalAlignment'] ?? null) {
             $alignment = ' class="uk-text-' . $block['horizontalAlignment'] . '"';
         }
 
@@ -411,17 +437,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
 
     public function getUrlFromPage(array $data): ?string
     {
-        $pagePath = $data['pagePath'] ?? null;
-        $parentSlug = $data['parentSlug'] ?? null;
-
-        // Si on a les deux slugs, on peut générer l'URL sans requête DB
-        if ($pagePath) {
-            $fullPath = $parentSlug ? $parentSlug . '/' . $pagePath : $pagePath;
-
-            return $this->urlGenerator->generate('front_page_show', ['fullPath' => $fullPath], UrlGeneratorInterface::RELATIVE_PATH);
-        }
-
-        return null;
+        return $this->pageUrlGenerator->generate($data);
     }
 
     private function renderButtonBlock(array $block): string
@@ -438,7 +454,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
         }
 
         $url = $this->escapeText($url);
-        $class = $block['horizontalAlignment'] ? 'uk-text-' . $block[ 'horizontalAlignment'] : '';
+        $class = ($block['horizontalAlignment'] ?? null) ? 'uk-text-' . $block['horizontalAlignment'] : '';
         $colorClass = $block['class'] ?? null;
 
         // pour l'instant, on récupère le style directement dans le css selon le fond
@@ -533,7 +549,7 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
 
         $alignment = '';
         if (isset($block['horizontalAlignment']) && $block['horizontalAlignment']) {
-            $alignment = ' uk-text-' . $block['horizontalAlignment'];
+            $alignment = ' uk-text-' . ($block['horizontalAlignment'] ?? '');
         }
 
         return sprintf('<div class="uk-inline%s"><img src="%s" alt="%s"%s/></div>', $alignment, $this->escapeText($src), $alt, $style);
@@ -581,13 +597,13 @@ class UiKitPageBuilderRenderer implements PageBuilderRendererInterface
 
     private function renderGrid(array $block): string
     {
-        $row = $block['row'];
+        $row = $block['row'] ?? null;
         if (empty($row)) {
             return '';
         }
 
         $html = '<div class="uk-grid-match uk-child-width-auto uk-text-center uk-flex-center uk-scrollspy-inview" uk-grid>';
-        foreach ($row['columns'] as $col) {
+        foreach ($row['columns'] ?? [] as $col) {
 
             $style = '';
             $colClasses = [];

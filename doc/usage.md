@@ -155,7 +155,17 @@ When using the **Custom JSON Page** type with the built-in page builder, you can
 
 ### Title block styles
 
-The title block can offer a dropdown of predefined CSS styles. Each style maps a `value` (used as a CSS class in your front-end) to a human-readable `label` displayed in the admin interface.
+The title block can offer a dropdown of predefined CSS styles. Each style maps a `value` to a
+human-readable `label` displayed in the admin interface.
+
+The `value` is written to the block's `size` and drives the rendered markup: it reads as
+`tag-class_class_size`, where the leading segment is the HTML tag and a trailing number is a pixel
+font size. So `h2-highlight_32` renders `<h2 class="highlight" style="font-size:32px">`, and a bare
+`h2` renders `<h2>` with no class.
+
+> **Class names cannot contain an underscore.** The value is split on `_` to separate classes from
+> the font size, so a BEM name like `footer__text` yields three classes, one of them empty. Hyphens
+> are fine: `footer-text` works, in both the canvas and the rendered page.
 
 ### Button block colors
 
@@ -176,6 +186,207 @@ aropixel_page:
             - { value: 'btn-primary', label: 'Primary' }
             - { value: 'btn-secondary', label: 'Secondary' }
             - { value: 'btn-outline-primary', label: 'Outline' }
+```
+
+Both lists are **empty by default**, and an empty list hides its selector entirely — the bundle
+defines no CSS of its own, so it ships no style: offering authors a choice that renders as nothing
+would be worse than offering none. Declare only what your stylesheet actually provides.
+
+If a page was saved with a style you later removed from the configuration, the value is **kept and
+flagged** in the dropdown rather than silently replaced: opening the inspector never rewrites
+existing content.
+
+### Restricting access to pages
+
+The bundle loads pages by id, straight from the URL or the save payload. In a single-tenant
+application that is fine: reaching the admin is the authorisation. As soon as pages belong to
+something narrower — one tenant, one brand, one site of a multi-site install — an id in a request is
+not proof that the current user may touch that page.
+
+Implement `PageAccessCheckerInterface` and replace the service:
+
+```php
+namespace App\Page;
+
+use Aropixel\PageBundle\Component\Security\PageAccessCheckerInterface;
+use Aropixel\PageBundle\Entity\PageInterface;
+
+class TenantPageAccessChecker implements PageAccessCheckerInterface
+{
+    public function isGranted(string $attribute, PageInterface $page): bool
+    {
+        return $page->getTenant() === $this->tenantContext->current();
+    }
+}
+```
+
+```yaml
+# config/services.yaml
+services:
+    Aropixel\PageBundle\Component\Security\PageAccessCheckerInterface:
+        alias: App\Page\TenantPageAccessChecker
+```
+
+Three attributes are checked, and every page the bundle touches goes through one of them:
+
+| Attribute | Where |
+|---|---|
+| `VIEW` | builder preview, page listings (entries you may not see are filtered out) |
+| `EDIT` | builder canvas, builder save, page edit form, status change |
+| `DELETE` | page deletion |
+
+A refusal is reported as **404, not 403**: whether a page exists is itself information. The default
+implementation grants everything, so an application that does not replace the service behaves exactly
+as before.
+
+> **Not covered:** creating a page. There is no entity to check yet, so a project that must restrict
+> creation does it in its own controller.
+
+### Assets
+
+The page builder loads no third-party asset from a CDN. Quill comes from AdminBundle — `quill.js`
+and `quill.snow.css` through the admin layout, `quill.bubble.css` (the canvas's inline editor)
+through the builder's own stylesheets block — all in the same version.
+
+The one remaining exception is the preview window (`builder/preview.html.twig`), which still pulls
+Bootstrap and UIkit from a CDN. It is on the list to fix, together with letting a project declare the
+stylesheets its preview should use.
+
+### Section colours
+
+A section carries a background — colour, image or CSS class — and, since the background is free, the
+colours of what sits on it. A dark background with the site's default ink is unreadable, so the two
+are set in the same place.
+
+**Which colours a section offers is yours to decide.** The default is text, titles and links, which
+is what most pages need:
+
+```yaml
+aropixel_page:
+    page_builder:
+        section_colors:
+            - { key: 'text',  label: 'page.builder.inspector.text_color',  variable: '--pb-text-color', inherited: true }
+            - { key: 'title', label: 'page.builder.inspector.title_color', variable: '--pb-title-color' }
+            - { key: 'link',  label: 'page.builder.inspector.link_color',  variable: '--pb-link-color' }
+```
+
+Each entry adds a picker to the section inspector and writes one custom property on the section.
+`label` is a translation key; `key` is how the value is stored in the payload, as `<key>Color`.
+
+`inherited: true` also writes the colour as `color` on the section, so every block picks it up
+without a rule — that is the text colour, and a second one would simply overwrite the first. The
+others cannot be reached that way, since an inline style cannot target a descendant, so **each needs
+one rule from your stylesheet**, once:
+
+```css
+.my-page :is(h1, h2, h3, h4, h5, h6) { color: var(--pb-title-color, inherit); }
+.my-page a { color: var(--pb-link-color, inherit); }
+```
+
+The `inherit` fallback is what makes titles and links follow the text colour until someone gives them
+one of their own. Leave a colour empty and nothing is written at all: the site's own styles apply.
+
+> Your rule decides what counts as a title. A theme whose headings are `<div class="heading">` — the
+> block's named styles allow it — names that class here instead of, or alongside, `h1`–`h6`.
+>
+> Adding a fourth colour — buttons, icons, borders — is a line of configuration and a line of CSS;
+> the bundle needs no change.
+
+### Restricting the block library
+
+By default authors can use every block the bundle ships. `allowed_blocks` narrows that to a list you
+choose:
+
+```yaml
+aropixel_page:
+    page_builder:
+        allowed_blocks: ['text', 'image', 'divider', 'spacer', 'button']
+```
+
+An empty list — the default — allows everything. Otherwise:
+
+- the library only renders the allowed cards, and **a tab left with no card is not displayed at
+  all**; the first tab still holding a card becomes the active one;
+- a save carrying a forbidden block is **rejected with a 400** listing the offending types. The
+  library is presentation, and a payload reaches the server as JSON: `BlockPolicy` is where the list
+  is actually enforced, nested rows included.
+
+Custom blocks are subject to the same list: declaring one in `custom_blocks` does not exempt it, so
+a non-empty `allowed_blocks` must name it too.
+
+> **Scope:** the list is global to the application, not per page type. A project using the builder
+> for two purposes — a footer and editorial pages, say — cannot yet allow different blocks for each.
+
+### Requiring a block
+
+Some blocks are not a matter of taste. `required_blocks` names the types a page must carry to be
+saved at all:
+
+```yaml
+aropixel_page:
+    page_builder:
+        required_blocks: ['legal-links']
+```
+
+A save whose payload does not carry one is **rejected with a 400**, naming the block by its library
+label rather than its type — the author who has just deleted it without thinking needs to recognise
+it. The block counts wherever it sits, nested rows included.
+
+An empty list — the default — requires nothing. The same scope note as `allowed_blocks` applies.
+
+### Linking to another page
+
+A button block, or a clickable column, can target another page of the site rather than a raw URL. The
+builder stores the target's slug (`pagePath`, plus `parentSlug` when the target has a parent) and the
+renderer turns it into a URL at save time — which means the bundle needs to know **how your
+application routes its pages**.
+
+By default it generates the route `front_page_show` with a `fullPath` parameter, the parent slug
+prefixing the page slug. Point it at your own route:
+
+```yaml
+aropixel_page:
+    page_builder:
+        front_route:
+            name: 'app_page_show'   # your route name
+            parameter: 'slug'       # the parameter receiving the page path
+            include_parent: false   # flat URLs (/page/{slug}); true for hierarchical ones (/{fullPath})
+```
+
+`include_parent` is the difference between the two usual conventions:
+
+| Convention | Route | `include_parent` | Generated |
+|---|---|---|---|
+| Hierarchical | `/{fullPath}` | `true` (default) | `about/team` |
+| Flat | `/page/{slug}` | `false` | `/page/team` |
+
+A route that cannot be generated — wrong name, missing parameter — produces **no URL and a warning
+in the logs**, never an exception: a misconfigured link must not stop an author from saving a page.
+The block then falls back to whatever raw `url` it carries.
+
+If neither convention fits — per-host URLs in a multi-tenant application, a locale in the path,
+anything that needs more than a route name — implement `PageUrlGeneratorInterface` and replace the
+service:
+
+```php
+namespace App\Page;
+
+use Aropixel\PageBundle\Component\Builder\PageUrlGeneratorInterface;
+
+class TenantPageUrlGenerator implements PageUrlGeneratorInterface
+{
+    public function generate(array $data): ?string
+    {
+        // $data['pagePath'], $data['parentSlug'] - return null when you cannot build a URL
+    }
+}
+```
+
+```yaml
+# config/services.yaml
+services:
+    Aropixel\PageBundle\Component\Builder\PageUrlGeneratorInterface:
+        alias: App\Page\TenantPageUrlGenerator
 ```
 
 ### Multilingual support
@@ -317,3 +528,74 @@ class PageSavedListener
     }
 }
 ```
+
+### Replacing the builder's action menu
+
+The builder's header carries a dropdown — save, new page, back to the list, preview. An application
+that uses the builder for a single fixed page has no use for "new page" or "back to the list", so the
+menu sits in its own Twig block:
+
+```twig
+{# templates/bundles/AropixelPageBundle/builder/index.html.twig #}
+{% extends '@!AropixelPage/builder/index.html.twig' %}
+
+{% block builder_actions %}
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+            <a class="dropdown-item" href="#" data-action="click->page-builder-saver#save">Enregistrer</a>
+        </li>
+    </ul>
+{% endblock %}
+```
+
+Overriding it also frees the application from mounting the routes those entries point at
+(`aropixel_builder_page`, `aropixel_page_index`): a route only has to exist if a rendered template
+generates it.
+
+### Overriding the builder's own URLs
+
+The builder posts its saves to `aropixel_builder_page_save` and links the preview to
+`aropixel_builder_page_preview`. An application whose admin carries context in the URL — a tenant id,
+a locale — needs those URLs to carry it too, or the save lands without the context that identifies
+the page's owner.
+
+Three template variables override them, each defaulting to the bundle's own route:
+
+```twig
+{# templates/bundles/AropixelPageBundle/builder/index.html.twig #}
+{% extends '@!AropixelPage/builder/index.html.twig' %}
+
+{% set save_url = path('aropixel_builder_page_save', {tenant: app.request.get('tenant')}) %}
+{% set preview_url = path('aropixel_builder_page_preview', {id: page.id, tenant: app.request.get('tenant')}) %}
+{% set json_list_url = url('aropixel_builder_page_json_list', {tenant: app.request.get('tenant')}) %}
+```
+
+A `{% set %}` at the root of a child template is evaluated before the parent's blocks render, so the
+variables reach them.
+
+### Trimming the builder for a single fixed page
+
+Besides `builder_actions` (above), two more blocks let an application drop what a fixed page does not
+need:
+
+| Block | What it holds |
+|---|---|
+| `builder_page_name` | The editable page name in the header — meaningless when the page is a fixed one |
+| `builder_tabs` | The tab bar: page settings, inspector, content |
+
+A footer, for instance, has no slug and no SEO metadata to set, and its name is not the author's to
+choose:
+
+```twig
+{% block builder_page_name %}{% endblock %}
+
+{% block builder_tabs %}
+    <ul class="nav nav-tabs tab-underlined" id="myTab" role="tablist">
+        <li class="nav-item"><a class="nav-link" href="#nav-structure" data-bs-toggle="tab" role="tab" id="nav-structure-tab">Inspecteur</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#nav-library" data-bs-toggle="tab" role="tab" id="nav-library-tab">Contenu</a></li>
+    </ul>
+{% endblock %}
+```
+
+Dropping a tab from the bar leaves its pane in the document, simply unreachable — harmless, and it
+keeps the override to the bar itself.

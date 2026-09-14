@@ -242,6 +242,7 @@ export class SectionsManager {
     updateSectionLayout(layout) { this.sectionActions.updateSectionLayout(layout); }
     updateSectionVisibility(options) { this.sectionActions.updateSectionVisibility(options); }
     updateSectionBackground(type, value) { this.sectionActions.updateSectionBackground(type, value); }
+    updateSectionColor(key, color) { this.sectionActions.updateSectionColor(key, color); }
 
 
     // Rows

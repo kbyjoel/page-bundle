@@ -1,4 +1,6 @@
 import { t } from '../i18n.js';
+import { getStyleOptions, renderStyleSelect } from '../style_options.js';
+import { icon } from '../../utils/icons.js';
 
 export const btnBlockType = {
     type: 'button',
@@ -8,7 +10,7 @@ export const btnBlockType = {
             id: generateId(),
             type: 'button',
             label: t('page.builder.block.button.default_label'),
-            class: 'primary-xdark',
+            class: '',
             url: '#',
             pagePath: null,
             linkType: 'url',
@@ -62,7 +64,7 @@ export const btnBlockType = {
                                 data-page-builder-target="blockAlignmentButton"
                                 data-action="click->page-builder#updateBlockHorizontalAlignment"
                                 title="Aligné à gauche">
-                            <i class="fas fa-align-left"></i>
+                            ${icon('align-left')}
                         </button>
                         <button type="button"
                                 class="pb-button pb-button--ghost flex-fill"
@@ -70,7 +72,7 @@ export const btnBlockType = {
                                 data-page-builder-target="blockAlignmentButton"
                                 data-action="click->page-builder#updateBlockHorizontalAlignment"
                                 title="Centré">
-                            <i class="fas fa-align-center"></i>
+                            ${icon('align-center')}
                         </button>
                         <button type="button"
                                 class="pb-button pb-button--ghost flex-fill"
@@ -78,7 +80,7 @@ export const btnBlockType = {
                                 data-page-builder-target="blockAlignmentButton"
                                 data-action="click->page-builder#updateBlockHorizontalAlignment"
                                 title="Aligné à droite">
-                            <i class="fas fa-align-right"></i>
+                            ${icon('align-right')}
                         </button>
                     </div>
                 </div>
@@ -120,16 +122,13 @@ export const btnBlockType = {
                         <option value="">${t('form.choose')}</option>
                     </select>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label pb-label">${t('page.builder.block.button.color')}</label>
-                    <select class="form-select form-select-sm" id="btn-color-select"
-                        data-page-builder-target="blockColorInput"
-                        data-action="change->page-builder#updateBlockContent">
-                        <option value="primary-xdark" ${block.class === 'primary-xdark' ? 'selected' : ''}>Violet foncé</option>
-                        <option value="secondary" ${block.class === 'secondary' ? 'selected' : ''}>Jaune</option>
-                    </select>
-                </div>
+${renderStyleSelect({
+                    options: getStyleOptions(ctx, 'button_colors'),
+                    selected: block.class || '',
+                    id: 'btn-color-select',
+                    label: t('page.builder.block.button.color'),
+                    target: 'blockColorInput',
+                })}
             `;
         }
 
@@ -184,11 +183,18 @@ export const btnBlockType = {
 
     handleInspectorInput(block, event) {
         if (event.target.dataset.pageBuilderTarget === 'blockColorInput') {
+            const previousClass = block.class;
             block.class = event.target.value;
 
             const contentElements = document.querySelectorAll('.pb-block[data-block-id="' + block.id + '"] .pb-btn-preview');
             contentElements.forEach(el => {
-                el.classList.add(event.target.value);
+                // Remplacer, pas empiler : sans cela le bouton cumule toutes les couleurs essayées.
+                if (previousClass) {
+                    el.classList.remove(previousClass);
+                }
+                if (block.class) {
+                    el.classList.add(block.class);
+                }
             });
         } else if (event.target.dataset.pageBuilderTarget === 'blockContentInput') {
             block.label = event.target.value;

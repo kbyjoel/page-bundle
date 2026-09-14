@@ -181,12 +181,6 @@ export class SectionActions {
                 row.type = 'icon-box';
             }
 
-            if (templateType === 'ticketing') {
-                row.type = 'ticketing';
-                row.align = 'stretch';
-                row.justify = 'center';
-            }
-
             rowDef.columns.forEach((width, i) => {
                 const col = new Column(width);
                 row.columns.push(col);
@@ -211,12 +205,6 @@ export class SectionActions {
                 if (column) {
                     column.addBlock(blockData);
                     if (templateType === 'iconbox') {
-                        column.width.m = '1-2';
-                        column.width.s = '1-1';
-                    }
-
-                    if (templateType === 'ticketing') {
-                        column.width.l = '1-3';
                         column.width.m = '1-2';
                         column.width.s = '1-1';
                     }
@@ -330,6 +318,24 @@ export class SectionActions {
         section.visibleMobile = mobile;
     }
 
+
+    /**
+     * Couleur du texte de la section. Le fond étant libre, le texte doit pouvoir suivre : un fond
+     * sombre rend illisible une encre prévue pour du clair.
+     */
+    /**
+     * Une des couleurs offertes par `section_colors`, rangée en `<clé>Color` à côté des autres
+     * propriétés de la section — et non dans un objet à part, pour qu'une page enregistrée avant que
+     * cette liste existe se relise sans migration.
+     *
+     * `null` plutôt qu'une chaîne vide : c'est ce que le rendu lit pour ne rien écrire du tout.
+     */
+    updateSectionColor(key, color) {
+        const section = this.manager.selectedSection;
+        if (!section || !key) return;
+
+        section[`${key}Color`] = color || null;
+    }
 
     updateSectionBackground(type, value, imageId = null) {
         const section = this.manager.selectedSection;

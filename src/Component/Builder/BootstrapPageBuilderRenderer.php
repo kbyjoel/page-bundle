@@ -4,7 +4,6 @@ namespace Aropixel\PageBundle\Component\Builder;
 
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 /**
@@ -13,10 +12,13 @@ use Twig\Environment;
 class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
 {
     public function __construct(
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly PageUrlGeneratorInterface $pageUrlGenerator,
         private readonly RequestStack $requestStack,
         private readonly Environment $twig,
         private readonly CacheManager $cacheManager,
+        /** @var iterable<CustomBlockRendererInterface> */
+        private readonly iterable $customBlockRenderers = [],
+        private readonly SectionColors $sectionColors = new SectionColors(),
     ) {
     }
 
@@ -52,7 +54,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
             $sectionClasses = ['py-5'];
             $sectionStyle = '';
 
-            $background = $section['background'];
+            $background = $section['background'] ?? null;
             if ($background) {
                 $backgroundType = $background['type'] ?? null;
 
@@ -65,6 +67,11 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
                     $sectionStyle .= 'background-color:' . htmlspecialchars($background['value']) . ';';
                 }
             }
+
+            // Un fond choisi librement peut rendre le contenu illisible : les couleurs de la section
+            // se règlent au même endroit, et c'est l'application qui dit lesquelles elle offre.
+            // {@see SectionColors}
+            $sectionStyle .= $this->sectionColors->styleFor($section);
 
             $layout = $section['layout'] ?? 'container';
 
@@ -85,7 +92,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
 
             $rows = $section['rows'] ?? [];
             foreach ($rows as $row) {
-                $slider = $row['slider'];
+                $slider = $row['slider'] ?? null;
 
                 $rowAlign = $row['align'] ?? null;
                 $rowJustify = $row['justify'] ?? null;
@@ -99,7 +106,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
                     $gridClasses[] = $this->mapJustifyContent($rowJustify);
                 }
 
-                if ($row['type'] === 'collapse') {
+                if (($row['type'] ?? null) === 'collapse') {
                     $gridClasses[] = 'g-0';
                     $sectionClasses[] = 'p-0';
                 }
@@ -117,7 +124,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
 
                     $colClasses = [$this->mapWidthToBootstrap($widths)];
 
-                    if ($row['reverseMobile'] && 0 == $key) {
+                    if (($row['reverseMobile'] ?? false) && 0 == $key) {
                         $colClasses[] = 'order-last order-md-first';
                     }
 
@@ -143,8 +150,9 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
                         }
                     }
 
-                    if ($col['height'] && 'auto' !== $col['height']) {
-                        $style .= 'min-height:' . htmlspecialchars((string)$col['height']) . ';';
+                    $colHeight = $col['height'] ?? null;
+                    if ($colHeight && 'auto' !== $colHeight) {
+                        $style .= 'min-height:' . htmlspecialchars((string)$colHeight) . ';';
                         $colClasses[] = 'd-flex flex-column justify-content-center';
                     }
 
@@ -326,8 +334,26 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
             'nested-row' => $this->renderGrid($block),
             'banner' => $this->renderBanner($block),
             'iframe' => $this->renderIframeBlock($block),
-            default => ''
+            default => $this->renderCustomBlock($block),
         };
+    }
+
+    /**
+     * A type the bundle does not know: the application may still render it.
+     *
+     * @param array<string, mixed> $block
+     */
+    private function renderCustomBlock(array $block): string
+    {
+        $type = (string)($block['type'] ?? '');
+
+        foreach ($this->customBlockRenderers as $renderer) {
+            if ($renderer->supports($type)) {
+                return $renderer->render($block);
+            }
+        }
+
+        return '';
     }
 
     private function renderTitleBlock(array $block): string
@@ -361,7 +387,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
         }
 
         $alignment = '';
-        if ($block['horizontalAlignment']) {
+        if ($block['horizontalAlignment'] ?? null) {
             $alignment = ' class="' . $this->mapHorizontalAlign($block['horizontalAlignment']) . '"';
         }
 
@@ -395,15 +421,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
 
     public function getUrlFromPage(array $data): ?string
     {
-        $pagePath = $data['pagePath'] ?? null;
-        $parentSlug = $data['parentSlug'] ?? null;
-
-        if ($pagePath) {
-            $fullPath = $parentSlug ? $parentSlug . '/' . $pagePath : $pagePath;
-            return $this->urlGenerator->generate('front_page_show', ['fullPath' => $fullPath], UrlGeneratorInterface::RELATIVE_PATH);
-        }
-
-        return null;
+        return $this->pageUrlGenerator->generate($data);
     }
 
     private function renderButtonBlock(array $block): string
@@ -420,7 +438,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
         }
 
         $url = $this->escapeText($url);
-        $class = $block['horizontalAlignment'] ? $this->mapHorizontalAlign($block['horizontalAlignment']) : '';
+        $class = ($block['horizontalAlignment'] ?? null) ? $this->mapHorizontalAlign($block['horizontalAlignment']) : '';
         $colorClass = $block['class'] ?? 'btn-primary';
 
         $targetAttribute = '';
@@ -501,7 +519,7 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
 
         $alignment = '';
         if (isset($block['horizontalAlignment']) && $block['horizontalAlignment']) {
-            $alignment = ' ' . $this->mapHorizontalAlign($block['horizontalAlignment']);
+            $alignment = ' ' . $this->mapHorizontalAlign($block['horizontalAlignment'] ?? null);
         }
 
         return sprintf('<div class="%s"><img src="%s" alt="%s"%s/></div>', trim($alignment), $this->escapeText($src), $alt, $style);
@@ -537,13 +555,13 @@ class BootstrapPageBuilderRenderer implements PageBuilderRendererInterface
 
     private function renderGrid(array $block): string
     {
-        $row = $block['row'];
+        $row = $block['row'] ?? null;
         if (empty($row)) {
             return '';
         }
 
         $html = '<div class="row row-cols-auto justify-content-center text-center">';
-        foreach ($row['columns'] as $col) {
+        foreach ($row['columns'] ?? [] as $col) {
 
             $style = '';
             $colClasses = ['col'];

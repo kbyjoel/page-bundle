@@ -4,6 +4,7 @@ namespace Aropixel\PageBundle\DependencyInjection;
 
 use Aropixel\PageBundle\Attribute\AsFixedPage;
 use Aropixel\PageBundle\Component\Builder\BootstrapPageBuilderRenderer;
+use Aropixel\PageBundle\Component\Builder\CustomBlockRendererInterface;
 use Aropixel\PageBundle\Component\Builder\UiKitPageBuilderRenderer;
 use Aropixel\PageBundle\Component\Builder\PageBuilderRendererInterface;
 use Aropixel\PageBundle\Entity\PageInterface;
@@ -43,6 +44,9 @@ class AropixelPageExtension extends Extension implements PrependExtensionInterfa
             }
         );
 
+        $container->registerForAutoconfiguration(CustomBlockRendererInterface::class)
+            ->addTag('aropixel_page.block_renderer');
+
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
 
@@ -72,6 +76,15 @@ class AropixelPageExtension extends Extension implements PrependExtensionInterfa
             : [];
         $container->setParameter('aropixel_page.page_builder', array_merge($config['page_builder'], ['locales' => $locales]));
         $container->setParameter('aropixel_page.page_builder.enabled', $config['page_builder']['enabled']);
+        $container->setParameter('aropixel_page.page_builder.allowed_blocks', $config['page_builder']['allowed_blocks']);
+        $container->setParameter('aropixel_page.page_builder.required_blocks', $config['page_builder']['required_blocks']);
+        $container->setParameter('aropixel_page.page_builder.section_colors', $config['page_builder']['section_colors']);
+        $container->setParameter('aropixel_page.page_builder.custom_blocks', $config['page_builder']['custom_blocks']);
+        $frontRoute = $config['page_builder']['front_route'];
+        $container->setParameter('aropixel_page.page_builder.front_route', $frontRoute);
+        $container->setParameter('aropixel_page.page_builder.front_route.name', $frontRoute['name']);
+        $container->setParameter('aropixel_page.page_builder.front_route.parameter', $frontRoute['parameter']);
+        $container->setParameter('aropixel_page.page_builder.front_route.include_parent', $frontRoute['include_parent']);
     }
 
     public function prepend(ContainerBuilder $container): void
